@@ -7,18 +7,13 @@ import (
 	"net/url"
 	"os"
 
+	icons "github.com/RewstApp/agent-smith-tray/icon"
 	"github.com/getlantern/systray"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-hclog"
 
 	_ "embed"
 )
-
-//go:embed icon/online.ico
-var onlineIconData []byte
-
-//go:embed icon/offline.ico
-var offlineIconData []byte
 
 const serverPort = 50001
 
@@ -52,10 +47,10 @@ func main() {
 
 			switch string(message) {
 			case "AgentOnline":
-				systray.SetIcon(onlineIconData)
+				systray.SetIcon(icons.Online)
 			case "AgentOffline":
 			case "AgentReconnecting":
-				systray.SetIcon(offlineIconData)
+				systray.SetIcon(icons.Offline)
 			}
 		}
 	}()
@@ -92,7 +87,7 @@ func UpdateStatus() {
 
 func onReady() {
 	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
-	systray.SetIcon(offlineIconData)
+	systray.SetIcon(icons.Offline)
 
 	systray.SetTitle("Agent Smith")
 	systray.SetTooltip("Loading status...")
