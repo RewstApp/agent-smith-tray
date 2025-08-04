@@ -15,6 +15,10 @@ import (
 // Constants
 const serverPort = 50001
 
+// Global state
+var conn *websocket.Conn
+var logger hclog.Logger
+
 // Status helpers
 func setOnline() {
 	systray.SetIcon(icons.Online)
@@ -47,18 +51,6 @@ func onReady() {
 			systray.Quit()
 		}
 	}()
-}
-
-func onExit() {
-	// Cleanup if needed
-}
-
-func main() {
-	// Create logger for consistent lg
-	logger := hclog.New(&hclog.LoggerOptions{
-		Name:  "agent-smith-tray",
-		Level: hclog.Debug,
-	})
 
 	// Define WebSocket URL
 	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("localhost:%d", serverPort), Path: "/ws"}
@@ -69,7 +61,6 @@ func main() {
 	if err != nil {
 		logger.Error("Dial error", "error", err)
 	}
-	defer conn.Close()
 
 	// Read loop
 	go func() {
@@ -91,6 +82,19 @@ func main() {
 			}
 		}
 	}()
+}
+
+func onExit() {
+	// Cleanup if needed
+	conn.Close()
+}
+
+func main() {
+	// Create logger for consistent lg
+	logger = hclog.New(&hclog.LoggerOptions{
+		Name:  "agent-smith-tray",
+		Level: hclog.Debug,
+	})
 
 	// Block and run the tray icon
 	systray.Run(onReady, onExit)
