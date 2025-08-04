@@ -4,18 +4,62 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
-	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/gorilla/websocket"
+	"github.com/hashicorp/go-hclog"
 
 	_ "embed"
 )
 
-//go:embed icon/logo-rewsty.ico
-var iconData []byte
+//go:embed icon/online.ico
+var onlineIconData []byte
+
+//go:embed icon/offline.ico
+var offlineIconData []byte
+
+const serverPort = 50001
 
 func main() {
+	// Create logger for consistent lg
+	logger := hclog.New(&hclog.LoggerOptions{
+		Name:  "agent-smith-tray",
+		Level: hclog.Debug,
+	})
+
+	// Define WebSocket URL
+	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("localhost:%d", serverPort), Path: "/ws"}
+	logger.Info("Connecting to server", "server", u.String())
+
+	// Dial the WebSocket server
+	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		logger.Error("Dial error", "error", err)
+	}
+	defer conn.Close()
+
+	// Read loop
+	go func() {
+		for {
+			msgType, message, err := conn.ReadMessage()
+			if err != nil {
+				logger.Error("Read failed", "error", err)
+				return
+			}
+			logger.Info("Received message", "type", msgType, "message", string(message))
+
+			switch string(message) {
+			case "AgentOnline":
+				systray.SetIcon(onlineIconData)
+			case "AgentOffline":
+			case "AgentReconnecting":
+				systray.SetIcon(offlineIconData)
+			}
+		}
+	}()
+
 	systray.Run(onReady, onExit)
 }
 
@@ -48,7 +92,7 @@ func UpdateStatus() {
 
 func onReady() {
 	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
-	systray.SetIcon(iconData) // iconData is a []byte for icon file
+	systray.SetIcon(offlineIconData)
 
 	systray.SetTitle("Agent Smith")
 	systray.SetTooltip("Loading status...")
@@ -60,14 +104,6 @@ func onReady() {
 		for range mQuit.ClickedCh {
 			systray.Quit()
 			os.Exit(0)
-		}
-	}()
-
-	// Handle updates
-	go func() {
-		for {
-			UpdateStatus()
-			time.Sleep(time.Millisecond * 250)
 		}
 	}()
 }
