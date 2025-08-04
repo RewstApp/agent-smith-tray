@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
-	"os"
 
 	icons "github.com/RewstApp/agent-smith-tray/icon"
 	"github.com/getlantern/systray"
@@ -15,7 +12,46 @@ import (
 	_ "embed"
 )
 
+// Constants
 const serverPort = 50001
+
+// Status helpers
+func setOnline() {
+	systray.SetIcon(icons.Online)
+	systray.SetTooltip("Online")
+}
+
+func setReconnecting() {
+	systray.SetIcon(icons.Offline)
+	systray.SetTooltip("Reconnecting...")
+}
+
+func setOffline() {
+	systray.SetIcon(icons.Offline)
+	systray.SetTooltip("Offline")
+}
+
+// Event helpers
+func onReady() {
+	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
+	systray.SetIcon(icons.Offline)
+
+	// Offline is the starting status
+	setOffline()
+
+	mQuit := systray.AddMenuItem("Quit", "Quit the app")
+
+	// Handle menu events
+	go func() {
+		for range mQuit.ClickedCh {
+			systray.Quit()
+		}
+	}()
+}
+
+func onExit() {
+	// Cleanup if needed
+}
 
 func main() {
 	// Create logger for consistent lg
@@ -47,62 +83,15 @@ func main() {
 
 			switch string(message) {
 			case "AgentOnline":
-				systray.SetIcon(icons.Online)
+				setOnline()
 			case "AgentOffline":
+				setOffline()
 			case "AgentReconnecting":
-				systray.SetIcon(icons.Offline)
+				setReconnecting()
 			}
 		}
 	}()
 
+	// Block and run the tray icon
 	systray.Run(onReady, onExit)
-}
-
-type Status struct {
-	Cpu      int  `json:"cpu"`
-	Memory   int  `json:"memory"`
-	Disk     int  `json:"disk"`
-	Network  int  `json:"network"`
-	IsOnline bool `json:"is_online"`
-}
-
-func UpdateStatus() {
-	resp, err := http.Get("http://localhost:6060/status")
-	if err != nil {
-		systray.SetTooltip(fmt.Sprintf("Failed to fetch status: %v", err))
-		return
-	}
-	defer resp.Body.Close()
-
-	var status Status
-	json.NewDecoder(resp.Body).Decode(&status)
-
-	onlineString := "Offline"
-	if status.IsOnline {
-		onlineString = "Online"
-	}
-
-	systray.SetTooltip(fmt.Sprintf("CPU: %v%%\n", status.Cpu) + fmt.Sprintf("Memory: %v%%\n", status.Memory) + fmt.Sprintf("Disk: %v%%\n", status.Disk) + fmt.Sprintf("Network: %v%%\n", status.Network) + onlineString)
-}
-
-func onReady() {
-	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
-	systray.SetIcon(icons.Offline)
-
-	systray.SetTitle("Agent Smith")
-	systray.SetTooltip("Loading status...")
-
-	mQuit := systray.AddMenuItem("Quit", "Quit the app")
-
-	// Handle menu events
-	go func() {
-		for range mQuit.ClickedCh {
-			systray.Quit()
-			os.Exit(0)
-		}
-	}()
-}
-
-func onExit() {
-	// Cleanup if needed
 }
