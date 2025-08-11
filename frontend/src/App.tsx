@@ -15,7 +15,7 @@ function App() {
     Greet(name).then(updateResultText);
   }
 
-  const dashboardUrl = "https://pedroaviary-agent-smith.rew.st/s/home";
+  const dashboardUrl = "https://pedroaviary-customer-portal.rew.st/";
 
   return (
     <div
