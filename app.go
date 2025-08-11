@@ -105,6 +105,9 @@ func (a *App) onExit() {
 	if a.conn != nil {
 		a.conn.Close()
 	}
+
+	// Stop the app
+	runtime.Quit(a.ctx)
 }
 
 // startup is called when the app starts. The context is saved
