@@ -9,6 +9,7 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-hclog"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // Constants
@@ -52,12 +53,18 @@ func (a *App) onReady() {
 	// Offline is the starting status
 	a.setOffline()
 
+	mShow := systray.AddMenuItem("Show", "Show the app")
 	mQuit := systray.AddMenuItem("Quit", "Quit the app")
 
 	// Handle menu events
 	go func() {
-		for range mQuit.ClickedCh {
-			systray.Quit()
+		for {
+			select {
+			case <-mQuit.ClickedCh:
+				systray.Quit()
+			case <-mShow.ClickedCh:
+				runtime.Show(a.ctx)
+			}
 		}
 	}()
 
