@@ -1,6 +1,6 @@
 //go:build windows
 
-package icons
+package icon
 
 import (
 	_ "embed"
