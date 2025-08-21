@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/RewstApp/agent-smith-tray/icon"
+	"github.com/RewstApp/agent-smith-tray/msg"
 	"github.com/getlantern/systray"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-hclog"
@@ -81,20 +82,29 @@ func (a *App) onReady() {
 	// Read loop
 	go func() {
 		for {
-			msgType, message, err := conn.ReadMessage()
+			_, message, err := conn.ReadMessage()
 			if err != nil {
 				a.logger.Error("Read failed", "error", err)
 				return
 			}
-			a.logger.Info("Received message", "type", msgType, "message", string(message))
 
-			switch string(message) {
-			case "AgentOnline":
-				a.setOnline()
-			case "AgentOffline":
-				a.setOffline()
-			case "AgentReconnecting":
-				a.setReconnecting()
+			msgType, content := msg.Parse(string(message))
+
+			a.logger.Info("Received message", "type", msgType, "content", content)
+
+			switch msgType {
+			case "AgentStatus":
+				switch content {
+				case "Online":
+					a.setOnline()
+				case "Offline":
+				case "Stopped":
+					a.setOffline()
+				case "Reconnecting":
+					a.setReconnecting()
+				}
+			case "AgentReceivedMessage":
+				a.logger.Info("Received message", "type", msgType, "content", content)
 			}
 		}
 	}()
