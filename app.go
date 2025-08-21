@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -104,7 +105,13 @@ func (a *App) onReady() {
 					a.setReconnecting()
 				}
 			case "AgentReceivedMessage":
-				a.logger.Info("Received message", "type", msgType, "content", content)
+				var msg msg.Message
+				err = json.Unmarshal([]byte(content), &msg)
+				if err == nil {
+					a.onReceivedMessage(msg)
+				} else {
+					a.logger.Error("Failed to parse message", "error", err)
+				}
 			}
 		}
 	}()
@@ -118,6 +125,10 @@ func (a *App) onExit() {
 
 	// Stop the app
 	runtime.Quit(a.ctx)
+}
+
+func (a *App) onReceivedMessage(message msg.Message) {
+	a.logger.Info("Received message", "type", message.Type, "content", message.Content)
 }
 
 // startup is called when the app starts. The context is saved

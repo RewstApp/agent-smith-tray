@@ -17,3 +17,8 @@ func Parse(message string) (string, string) {
 
 	return messageType, messageContent
 }
+
+type Message struct {
+	Type    string `json:"type"`
+	Content string `json:"content"`
+}
