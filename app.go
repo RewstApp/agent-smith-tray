@@ -65,6 +65,7 @@ func (a *App) onReady() {
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 			case <-mShow.ClickedCh:
+				runtime.EventsEmit(a.ctx, "message:clear")
 				runtime.Show(a.ctx)
 			}
 		}
@@ -129,6 +130,8 @@ func (a *App) onExit() {
 
 func (a *App) onReceivedMessage(message msg.Message) {
 	a.logger.Info("Received message", "type", message.Type, "content", message.Content)
+
+	runtime.EventsEmit(a.ctx, "message:"+message.Type, message.Content)
 }
 
 // startup is called when the app starts. The context is saved
@@ -143,4 +146,9 @@ func (a *App) startup(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
+}
+
+func (a *App) ShowWindow() {
+	runtime.WindowSetAlwaysOnTop(a.ctx, true)
+	runtime.WindowShow(a.ctx)
 }

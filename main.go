@@ -33,6 +33,7 @@ func main() {
 		StartHidden:       true,
 		HideWindowOnClose: true,
 		BackgroundColour:  &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		AlwaysOnTop:       true,
 		OnStartup:         app.startup,
 		Bind: []any{
 			app,
