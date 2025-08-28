@@ -9,5 +9,11 @@
   "author": {
     "name": "mlataza",
     "email": "1750947+mlataza@users.noreply.github.com"
+  },
+  "info": {
+    "productName": "Agent Smith Tray",
+    "productVersion": "0.0.0",
+    "copyright": "2025 Rewst Inc",
+    "comments": "This is an executable that will be used to display a tray icon and add user interactivity."
   }
 }
