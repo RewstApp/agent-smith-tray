@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { ShowWindow } from "../wailsjs/go/main/App";
 import { EventsOn } from "../wailsjs/runtime/runtime";
@@ -8,6 +8,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Refresh from "@mui/icons-material/Refresh";
 import Typography from "@mui/material/Typography";
 
 type Link = {
@@ -23,15 +24,23 @@ const App = () => {
     { name: "Google", url: "https://google.com" },
   ]);
   const [currentLink, setCurrentLink] = useState<Link | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     EventsOn("message:user_interaction_html", (html) => {
       setUserInteractionHtml(html);
       ShowWindow();
     });
+
     EventsOn("message:clear", () => {
       setUserInteractionHtml("");
     });
+
+    const handleContextMenu = (e: any) => e.preventDefault();
+    window.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
   }, []);
 
   const handleLinkClick = (selectedLink: Link) => {
@@ -40,6 +49,10 @@ const App = () => {
 
   const handleBack = () => {
     setCurrentLink(null);
+  };
+
+  const handleRefresh = () => {
+    iframeRef.current?.contentWindow?.location?.reload();
   };
 
   if (userInteractionHtml != "") {
@@ -85,17 +98,25 @@ const App = () => {
       }}
     >
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar sx={{ gap: 2 }}>
           <Button
             color="inherit"
             onClick={handleBack}
             startIcon={<ArrowBackIcon />}
           >
-            Back
+            Back to Links
+          </Button>
+          <Button
+            color="inherit"
+            onClick={handleRefresh}
+            startIcon={<Refresh />}
+          >
+            Refresh
           </Button>
         </Toolbar>
       </AppBar>
       <iframe
+        ref={iframeRef}
         src={currentLink.url}
         style={{
           width: "100%",
