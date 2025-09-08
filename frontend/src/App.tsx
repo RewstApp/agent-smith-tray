@@ -32,6 +32,10 @@ const App = () => {
       setUserInteractionHtml("");
     });
 
+    EventsOn("message:links", (data) => {
+      setLinks(JSON.parse(data));
+    });
+
     const handleContextMenu = (e: any) => e.preventDefault();
     window.addEventListener("contextmenu", handleContextMenu);
     return () => {
