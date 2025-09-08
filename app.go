@@ -60,7 +60,7 @@ func (a *App) connectWithRetry(url url.URL) *websocket.Conn {
 			time.Sleep(retryTimeout)
 			continue
 		}
-		a.logger.Info("Connected to server", "url", url)
+		a.logger.Info("Connected to server", "url", url.String())
 		break
 	}
 
