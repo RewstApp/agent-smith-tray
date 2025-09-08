@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      os_list:
+        description: "JSON list of OS"
+        required: false
+        type: string
+        default: "['windows-latest']"
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.os_list) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.0"
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Setup python packages
+        run: |
+          pip install pipx
+          pipx ensurepath
+          pipx install commitizen
+          pipx upgrade commitizen
+
+      - name: Build binary
+        shell: pwsh
+        id: build
+        run: ./scripts/build.ps1 | % { "binary_path=$_" } >> $env:GITHUB_OUTPUT
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: ${{ steps.build.outputs.binary_path }}

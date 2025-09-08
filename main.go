@@ -1,77 +1,48 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"os"
-	"time"
+	"embed"
+	"runtime"
 
-	"github.com/getlantern/systray"
-
-	_ "embed"
+	"github.com/hashicorp/go-hclog"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
-//go:embed icon/logo-rewsty.ico
-var iconData []byte
+//go:embed all:frontend/dist
+var assets embed.FS
 
 func main() {
-	systray.Run(onReady, onExit)
-}
+	// Create logger for consistent lg
+	logger := hclog.New(&hclog.LoggerOptions{
+		Name:  "agent-smith-tray",
+		Level: hclog.Debug,
+	})
 
-type Status struct {
-	Cpu      int  `json:"cpu"`
-	Memory   int  `json:"memory"`
-	Disk     int  `json:"disk"`
-	Network  int  `json:"network"`
-	IsOnline bool `json:"is_online"`
-}
+	// Create an instance of the app structure
+	app := NewApp(logger)
 
-func UpdateStatus() {
-	resp, err := http.Get("http://localhost:6060/status")
+	// Create application with options
+	runtime.LockOSThread()
+	err := wails.Run(&options.App{
+		Title:  "Agent Smith",
+		Width:  800,
+		Height: 600,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		StartHidden:       true,
+		HideWindowOnClose: true,
+		BackgroundColour:  &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		AlwaysOnTop:       true,
+		OnStartup:         app.startup,
+		Bind: []any{
+			app,
+		},
+	})
+
 	if err != nil {
-		systray.SetTooltip(fmt.Sprintf("Failed to fetch status: %v", err))
-		return
+		logger.Error("Failed to run the tray executable", "error", err.Error())
 	}
-	defer resp.Body.Close()
-
-	var status Status
-	json.NewDecoder(resp.Body).Decode(&status)
-
-	onlineString := "Offline"
-	if status.IsOnline {
-		onlineString = "Online"
-	}
-
-	systray.SetTooltip(fmt.Sprintf("CPU: %v%%\n", status.Cpu) + fmt.Sprintf("Memory: %v%%\n", status.Memory) + fmt.Sprintf("Disk: %v%%\n", status.Disk) + fmt.Sprintf("Network: %v%%\n", status.Network) + onlineString)
-}
-
-func onReady() {
-	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
-	systray.SetIcon(iconData) // iconData is a []byte for icon file
-
-	systray.SetTitle("Agent Smith")
-	systray.SetTooltip("Loading status...")
-
-	mQuit := systray.AddMenuItem("Quit", "Quit the app")
-
-	// Handle menu events
-	go func() {
-		for range mQuit.ClickedCh {
-			systray.Quit()
-			os.Exit(0)
-		}
-	}()
-
-	// Handle updates
-	go func() {
-		for {
-			UpdateStatus()
-			time.Sleep(time.Millisecond * 250)
-		}
-	}()
-}
-
-func onExit() {
-	// Cleanup if needed
 }

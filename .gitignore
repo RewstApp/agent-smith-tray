@@ -1,1 +1,10 @@
-*.exe
+build/bin
+tmp
+node_modules
+
+/frontend/dist
+/frontend/wailsjs/**
+
+*.asar
+*.md5
+*.nsh
