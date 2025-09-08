@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/RewstApp/agent-smith-tray/icon"
 	"github.com/RewstApp/agent-smith-tray/msg"
@@ -16,6 +17,7 @@ import (
 
 // Constants
 const serverPort = 50001
+const retryTimeout = 2 * time.Second
 
 // App struct
 type App struct {
@@ -47,6 +49,24 @@ func (a *App) setOffline() {
 	systray.SetTooltip("Offline")
 }
 
+func (a *App) connectWithRetry(url url.URL) *websocket.Conn {
+	var conn *websocket.Conn
+	var err error
+
+	for {
+		conn, _, err = websocket.DefaultDialer.Dial(url.String(), nil)
+		if err != nil {
+			a.logger.Error("Failed to connect, retrying", "error", err, "timeout", retryTimeout)
+			time.Sleep(retryTimeout)
+			continue
+		}
+		a.logger.Info("Connected to server", "url", url)
+		break
+	}
+
+	return conn
+}
+
 // Event helpers
 func (a *App) onReady() {
 	// Set the tray icon (must be .ico on Windows, .png on Linux/macOS)
@@ -71,23 +91,21 @@ func (a *App) onReady() {
 		}
 	}()
 
-	// Define WebSocket URL
-	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("localhost:%d", serverPort), Path: "/ws"}
-	a.logger.Info("Connecting to server", "server", u.String())
-
-	// Dial the WebSocket server
-	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		a.logger.Error("Dial error", "error", err)
-	}
-
 	// Read loop
 	go func() {
+		// Define WebSocket URL
+		u := url.URL{Scheme: "ws", Host: fmt.Sprintf("localhost:%d", serverPort), Path: "/ws"}
+		a.logger.Info("Connecting to server", "server", u.String())
+
+		// Dial the WebSocket server
+		conn := a.connectWithRetry(u)
+
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
 				a.logger.Error("Read failed", "error", err)
-				return
+				conn = a.connectWithRetry(u)
+				continue
 			}
 
 			msgType, content := msg.Parse(string(message))
