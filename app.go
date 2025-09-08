@@ -161,11 +161,6 @@ func (a *App) startup(ctx context.Context) {
 	go systray.Run(a.onReady, a.onExit)
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 func (a *App) ShowWindow() {
 	runtime.WindowSetAlwaysOnTop(a.ctx, true)
 	runtime.WindowShow(a.ctx)
