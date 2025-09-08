@@ -93,7 +93,7 @@ Section
     CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
     CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 
-    ; --- Force start with Windows ---
+    # Force start with Windows
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${INFO_PRODUCTNAME}" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 
     !insertmacro wails.associateFiles
@@ -101,7 +101,7 @@ Section
 
     !insertmacro wails.writeUninstaller
 
-    ; Run the app after install
+    # Run the app after install
     Exec "$INSTDIR\${PRODUCT_EXECUTABLE}"
 SectionEnd
 
@@ -115,7 +115,7 @@ Section "uninstall"
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
 
-    ; --- Remove auto-start registry key ---
+    # Remove auto-start registry key
     DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${INFO_PRODUCTNAME}"
 
     !insertmacro wails.unassociateFiles
