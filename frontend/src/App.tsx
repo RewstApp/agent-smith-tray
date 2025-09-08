@@ -18,11 +18,7 @@ type Link = {
 
 const App = () => {
   const [userInteractionHtml, setUserInteractionHtml] = useState("");
-  const [links, setLinks] = useState<Link[]>([
-    { name: "Rewst", url: "https://rewst.io" },
-    { name: "Cluck University", url: "https://rewst.io/cluck-university/" },
-    { name: "Google", url: "https://google.com" },
-  ]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [currentLink, setCurrentLink] = useState<Link | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
@@ -52,7 +48,11 @@ const App = () => {
   };
 
   const handleRefresh = () => {
-    iframeRef.current?.contentWindow?.location?.reload();
+    if (!iframeRef.current || !currentLink) {
+      return;
+    }
+
+    iframeRef.current.src = currentLink.url;
   };
 
   if (userInteractionHtml != "") {
@@ -85,6 +85,7 @@ const App = () => {
             <Typography variant="h6">{link.name}</Typography>
           </Button>
         ))}
+        {links.length === 0 && <Typography variant="h6">No links</Typography>}
       </Stack>
     );
   }
