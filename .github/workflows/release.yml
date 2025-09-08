@@ -1,0 +1,95 @@
+name: Release
+
+on: workflow_dispatch
+
+jobs:
+  bump:
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Setup python packages
+        run: |
+          pip install pipx
+          pipx ensurepath
+          pipx install commitizen
+          pipx upgrade commitizen
+
+      - name: Bump version and push
+        run: |
+          git config --local user.email "automated_builds@rewst.io"
+          git config --local user.name "Rewst GitHub Actions"
+          cz bump --yes
+          git push
+          git push --tags
+
+  build:
+    needs: bump
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yml
+
+  sign:
+    needs: build
+    permissions:
+      contents: read
+    uses: ./.github/workflows/sign.yml
+    secrets:
+      ssl_com_username: ${{ secrets.SSL_COM_USERNAME }}
+      ssl_com_password: ${{ secrets.SSL_COM_PASSWORD }}
+      ssl_com_credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
+      ssl_com_totp_secret: ${{ secrets.SSL_COM_OTP }}
+      ssl_com_environment_name: ${{ secrets.SSL_COM_ENVIRONMENT_NAME }}
+
+  release:
+    needs: sign
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Setup python packages
+        run: |
+          pip install pipx
+          pipx ensurepath
+          pipx install commitizen
+          pipx upgrade commitizen
+
+      - name: Extract version
+        id: extract_version
+        run: echo "version=v$(cz version -p)" >> $GITHUB_OUTPUT
+
+      - name: Download windows signed assets
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-latest-signed
+          path: ./signed
+
+      - name: Create release and upload files
+        shell: pwsh
+        run: |
+          gh release create ${{ steps.extract_version.outputs.version }} --generate-notes (Get-Item ./signed/*)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
