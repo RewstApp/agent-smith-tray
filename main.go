@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"runtime"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/wailsapp/wails/v2"
@@ -23,6 +24,7 @@ func main() {
 	app := NewApp(logger)
 
 	// Create application with options
+	runtime.LockOSThread()
 	err := wails.Run(&options.App{
 		Title:  "Agent Smith",
 		Width:  800,
