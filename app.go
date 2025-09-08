@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/RewstApp/agent-smith-tray/icon"
@@ -18,6 +20,9 @@ import (
 // Constants
 const serverPort = 50001
 const retryTimeout = 2 * time.Second
+const configDirName = "AgentSmithTray"
+const configFileName = "config.json"
+const configLinksKey = "links"
 
 // App struct
 type App struct {
@@ -164,4 +169,87 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) ShowWindow() {
 	runtime.WindowSetAlwaysOnTop(a.ctx, true)
 	runtime.WindowShow(a.ctx)
+}
+
+func (a *App) getConfigPath() (string, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, configDirName, configFileName), nil
+}
+
+func (a *App) GetStoredLinks() string {
+	configPath, err := a.getConfigPath()
+	if err != nil {
+		a.logger.Error("Failed to get config path", "error", err)
+		return "[]"
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		a.logger.Error("Failed to read user config", "error", err, "path", configPath)
+		return "[]"
+	}
+
+	var settings map[string]any
+	err = json.Unmarshal(data, &settings)
+	if err != nil {
+		a.logger.Error("Failed to parse settings file", "error", err)
+		return "[]"
+	}
+
+	links, ok := settings[configLinksKey]
+	if !ok {
+		return "[]"
+	}
+
+	return links.(string)
+}
+
+func (a *App) SetStoredLinks(links string) {
+	configPath, err := a.getConfigPath()
+	if err != nil {
+		a.logger.Error("Failed to get config path", "error", err)
+		return
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		a.logger.Error("Failed to read user config", "error", err, "path", configPath)
+	}
+
+	var settings map[string]any
+	err = json.Unmarshal(data, &settings)
+	if err != nil {
+		a.logger.Error("Failed to parse settings file", "error", err)
+	}
+
+	if settings == nil {
+		settings = make(map[string]any)
+	}
+
+	settings[configLinksKey] = links
+
+	data, err = json.MarshalIndent(&settings, "", "  ")
+	if err != nil {
+		a.logger.Error("Failed to serialize the settings file", "error", err)
+		return
+	}
+
+	configDir := filepath.Dir(configPath)
+	err = os.MkdirAll(configDir, os.ModePerm)
+	if err != nil {
+		a.logger.Error("Failed to make config directory", "error", err)
+		return
+	}
+
+	err = os.WriteFile(configPath, data, os.ModePerm)
+	if err != nil {
+		a.logger.Error("Failed to write to settings file", "error", err)
+		return
+	}
+
+	a.logger.Info("Settings file saved", "path", configPath)
 }

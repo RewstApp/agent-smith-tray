@@ -1,6 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { ShowWindow } from "../wailsjs/go/main/App";
+import {
+  ShowWindow,
+  GetStoredLinks,
+  SetStoredLinks,
+} from "../wailsjs/go/main/App";
 import { EventsOn } from "../wailsjs/runtime/runtime";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -34,6 +38,11 @@ const App = () => {
 
     EventsOn("message:links", (data) => {
       setLinks(JSON.parse(data));
+      SetStoredLinks(data);
+    });
+
+    GetStoredLinks().then((links) => {
+      setLinks(JSON.parse(links));
     });
 
     const handleContextMenu = (e: any) => e.preventDefault();
