@@ -52,9 +52,16 @@ jobs:
           Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=2124703 -OutFile MicrosoftEdgeWebview2Setup.exe
           Start-Process .\MicrosoftEdgeWebview2Setup.exe -ArgumentList "/silent","/install" -NoNewWindow -Wait
 
+      - name: Install NSIS
+        run: choco install nsis -y
+
       - name: Install Wails
         run: |
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Check Wails Environment
+        run: |
+          wails doctor
 
       - name: Build binary
         shell: pwsh
