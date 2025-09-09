@@ -47,6 +47,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install WebView2
+        run: |
+          Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=2124703 -OutFile MicrosoftEdgeWebview2Setup.exe
+          Start-Process .\MicrosoftEdgeWebview2Setup.exe -ArgumentList "/silent","/install" -NoNewWindow -Wait
+
       - name: Build binary
         shell: pwsh
         id: build
