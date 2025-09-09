@@ -2,9 +2,6 @@
 
 
 if ($IsWindows) {
-    # Install go package 
-    go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
     # Set build output 
     $buildOutput = "agent-smith-tray-installer.win.exe"
 
