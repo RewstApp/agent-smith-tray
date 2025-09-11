@@ -32,7 +32,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          gh release list --repo RewstApp/agent-smith-httpd
+          gh release download --repo RewstApp/agent-smith-httpd --pattern "agent-smith-httpd.win.exe"
+          Copy-Item agent-smith-httpd.win.exe -Destination (New-Item -ItemType Directory -Path "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Force).FullName
         env:
           GH_TOKEN: ${{ secrets.gh_pat }}
 
