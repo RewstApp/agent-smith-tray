@@ -71,6 +71,12 @@ jobs:
         run: |
           makensis -VERSION
 
+      - name: Download plugins (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/RewstApp/agent-smith-httpd/releases/download/latest/agent-smith-httpd.win.exe" -OutFile "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Headers @{"Accept" = "application/octet-stream"}
+
       - name: Build binary
         shell: pwsh
         run: |
