@@ -29,7 +29,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/RewstApp/agent-smith-httpd/releases/download/v0.2.0/agent-smith-httpd.win.exe" -OutFile "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Headers @{Accept="application/octet-stream";Authorization="token $env:GITHUB_TOKEN"}
+          $assetUrl = (Invoke-RestMethod -Headers @{Authorization="token $env:GITHUB_TOKEN"; Accept="application/vnd.github+json"} `
+            -Uri "https://api.github.com/repos/RewstApp/agent-smith-httpd/releases/latest").assets | Where-Object { $_.name -eq $assetName } | Select-Object -ExpandProperty url
+
+          echo $assetUrl
 
       - name: Setup go
         uses: actions/setup-go@v5
