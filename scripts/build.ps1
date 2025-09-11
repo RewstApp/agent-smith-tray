@@ -2,11 +2,6 @@
 
 
 if ($IsWindows) {
-    # Install dependencies
-    choco install nsis -y
-    go install github.com/wailsapp/wails/v2/cmd/wails@latest
-    npm ci
-
     # Override the wails.json to set the correct version
     $config = Get-Content -Raw -Path "wails.json" | ConvertFrom-Json
     $config.info.productVersion = $(cz version -p)

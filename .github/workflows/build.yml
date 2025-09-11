@@ -47,6 +47,19 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install node dependencies
+        run: |
+          npm ci
+
+      - name: Install wails
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install nsis
+        if: runner.os == 'Windows'
+        run: |
+          choco install nsis -y
+
       - name: Build binary
         shell: pwsh
         run: |
