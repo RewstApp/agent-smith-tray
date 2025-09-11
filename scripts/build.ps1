@@ -2,11 +2,16 @@
 
 
 if ($IsWindows) {
-    # Set build output 
-    $buildOutput = "agent-smith-tray-installer.win.exe"
+    # Install dependencies
+    choco install nsis -y
+    go install github.com/wailsapp/wails/v2/cmd/wails@latest
+    npm ci
+
+    # Override the wails.json to set the correct version
+    $config = Get-Content -Raw -Path "wails.json" | ConvertFrom-Json
+    $config.info.productVersion = $(cz version -p)
+    $config | ConvertTo-Json -Depth 10 | Set-Content "wails.json"
 
     # Build the installer
-    wails build -nsis -o $buildOutput -v 0
-
-    Write-Output "./build/bin/$buildOutput"
+    wails build -nsis
 }

@@ -47,32 +47,13 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install WebView2
-        run: |
-          Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=2124703 -OutFile MicrosoftEdgeWebview2Setup.exe
-          Start-Process .\MicrosoftEdgeWebview2Setup.exe -ArgumentList "/silent","/install" -NoNewWindow -Wait
-
-      - name: Install NSIS
-        run: choco install nsis -y
-
-      - name: Install Wails
-        run: |
-          go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-      - name: Check Wails Environment
-        run: |
-          wails doctor
-
-      - name: Install node dependencies
-        run: |
-          npm ci
-
       - name: Build binary
+        shell: pwsh
         run: |
-          wails build -nsis -o "agent-smith-tray-installer.win.exe"
+          ./scripts/build.ps1
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: "./build/bin/agent-smith-tray-installer.win.exe"
+          path: "./build/bin/agent-smith-tray-amd64-installer.exe"
