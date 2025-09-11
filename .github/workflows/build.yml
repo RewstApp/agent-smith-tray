@@ -60,7 +60,7 @@ jobs:
         run: |
           choco install nsis -y
 
-      - name: Add NSIS to PATH
+      - name: Add nsis to PATH (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
