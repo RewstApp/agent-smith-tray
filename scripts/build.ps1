@@ -7,6 +7,9 @@ if ($IsWindows) {
     $config.info.productVersion = $(cz version -p)
     $config | ConvertTo-Json -Depth 10 | Set-Content "wails.json"
 
+    # Copy the plugin installer folder
+    Copy-Item "agent-smith-httpd.win.exe" "./build/windows/installer/agent-smith-httpd.win.exe"
+
     # Build the installer
     wails build -nsis
 }

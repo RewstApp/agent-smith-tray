@@ -89,7 +89,7 @@ Section
     InitPluginsDir
     CreateDirectory "$pluginsdir\agent-smith-plugins"
     SetOutPath "$pluginsdir\agent-smith-plugins"
-    File "tmp\agent-smith-httpd.win.exe"
+    File "agent-smith-httpd.win.exe"
     nsExec::ExecToLog '"$pluginsdir\agent-smith-plugins\agent-smith-httpd.win.exe" --install'
 
     !insertmacro wails.webview2runtime
