@@ -55,10 +55,15 @@ jobs:
         run: |
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Install nsis
+      - name: Install nsis (Windows)
         if: runner.os == 'Windows'
         run: |
           choco install nsis -y
+
+      - name: Check nsis (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          makensis -VERSION
 
       - name: Build binary
         shell: pwsh
