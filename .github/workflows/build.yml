@@ -31,7 +31,7 @@ jobs:
         run: |
           gh release list --repo RewstApp/agent-smith-httpd
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Setup go
         uses: actions/setup-go@v5
