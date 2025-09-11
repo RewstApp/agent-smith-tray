@@ -30,7 +30,7 @@ jobs:
         shell: pwsh
         run: |
           $assetUrl = (Invoke-RestMethod -Headers @{Authorization="token $env:GITHUB_TOKEN"; Accept="application/vnd.github+json"} `
-            -Uri "https://api.github.com/repos/RewstApp/agent-smith-httpd/releases/latest").assets | Where-Object { $_.name -eq $assetName } | Select-Object -ExpandProperty url
+            -Uri "https://api.github.com/repos/RewstApp/agent-smith-httpd/releases/latest").assets | Where-Object { $_.name -eq "agent-smith-httpd.win.exe"} | Select-Object -ExpandProperty url
 
           echo $assetUrl
 
