@@ -40,6 +40,8 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/build.yml
+    secrets:
+      gh_pat: ${{ secrets.GH_PAT }}
 
   sign:
     needs: build

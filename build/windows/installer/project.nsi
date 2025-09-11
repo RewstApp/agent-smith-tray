@@ -84,6 +84,14 @@ FunctionEnd
 Section
     !insertmacro wails.setShellContext
 
+    # Install agent smith httpd plugin
+    SetDetailsPrint both
+    InitPluginsDir
+    CreateDirectory "$pluginsdir\agent-smith-plugins"
+    SetOutPath "$pluginsdir\agent-smith-plugins"
+    File "agent-smith-httpd.win.exe"
+    nsExec::ExecToLog '"$pluginsdir\agent-smith-plugins\agent-smith-httpd.win.exe" --install'
+
     !insertmacro wails.webview2runtime
 
     SetOutPath $INSTDIR

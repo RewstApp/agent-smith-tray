@@ -2,14 +2,14 @@
 
 
 if ($IsWindows) {
-    # Install go package 
-    go install github.com/wailsapp/wails/v2/cmd/wails@latest
+    # Override the wails.json to set the correct version
+    $config = Get-Content -Raw -Path "wails.json" | ConvertFrom-Json
+    $config.info.productVersion = $(cz version -p)
+    $config | ConvertTo-Json -Depth 10 | Set-Content "wails.json"
 
-    # Set build output 
-    $buildOutput = "agent-smith-tray-installer.win.exe"
+    # Copy the plugin installer folder
+    Copy-Item "agent-smith-httpd.win.exe" "./build/windows/installer/agent-smith-httpd.win.exe"
 
     # Build the installer
-    wails build -nsis -o $buildOutput -v 0
-
-    Write-Output "./build/bin/$buildOutput"
+    wails build -nsis
 }

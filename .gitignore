@@ -8,3 +8,4 @@ node_modules
 *.asar
 *.md5
 *.nsh
+*.exe
