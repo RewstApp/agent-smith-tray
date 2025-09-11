@@ -25,6 +25,12 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Download plugins (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/RewstApp/agent-smith-httpd/releases/download/v0.2.0/agent-smith-httpd.win.exe" -OutFile "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Headers @{Accept="application/octet-stream";Authorization="token $env:GITHUB_TOKEN"}
+
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -70,12 +76,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           makensis -VERSION
-
-      - name: Download plugins (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/RewstApp/agent-smith-httpd/releases/download/v0.2.0/agent-smith-httpd.win.exe" -OutFile "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Headers @{Accept="application/octet-stream";Authorization="token ${{ secrets.GITHUB_TOKEN }}"}
 
       - name: Build binary
         shell: pwsh
