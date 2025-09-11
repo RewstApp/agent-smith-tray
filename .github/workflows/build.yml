@@ -68,12 +68,11 @@ jobs:
           npm ci
 
       - name: Build binary
-        shell: pwsh
-        id: build
-        run: wails build -nsis
+        run: |
+          wails build -nsis -o "agent-smith-tray-installer.win.exe"
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: ${{ steps.build.outputs.binary_path }}
+          path: "./build/bin/agent-smith-tray-installer.win.exe"
