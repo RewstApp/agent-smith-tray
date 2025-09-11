@@ -8,6 +8,9 @@ on:
         required: false
         type: string
         default: "['windows-latest']"
+    secrets:
+      gh_pat:
+        required: true
 
 jobs:
   build:
@@ -31,7 +34,7 @@ jobs:
         run: |
           gh release list --repo RewstApp/agent-smith-httpd
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.gh_pat }}
 
       - name: Setup go
         uses: actions/setup-go@v5
