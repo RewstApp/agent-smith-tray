@@ -29,10 +29,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $assetUrl = (Invoke-RestMethod -Headers @{Authorization="Bearer $env:GITHUB_TOKEN"; Accept="application/vnd.github+json"} `
-            -Uri "https://api.github.com/repos/RewstApp/agent-smith-httpd/releases/latest").assets | Where-Object { $_.name -eq "agent-smith-httpd.win.exe"} | Select-Object -ExpandProperty url
-
-          echo $assetUrl
+          gh release list --repo RewstApp/agent-smith-httpd
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup go
         uses: actions/setup-go@v5
