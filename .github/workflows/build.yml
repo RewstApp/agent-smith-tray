@@ -36,7 +36,7 @@ jobs:
           ls
           Copy-Item agent-smith-httpd.win.exe -Destination (New-Item -ItemType Directory -Path "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Force).FullName
           ls ./build/windows/installer/tmp
-          env:
+        env:
           GH_TOKEN: ${{ secrets.gh_pat }}
 
       - name: Setup go
