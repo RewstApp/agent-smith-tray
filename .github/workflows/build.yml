@@ -35,7 +35,8 @@ jobs:
           gh release download --repo RewstApp/agent-smith-httpd --pattern "agent-smith-httpd.win.exe"
           ls
           Copy-Item agent-smith-httpd.win.exe -Destination (New-Item -ItemType Directory -Path "./build/windows/installer/tmp/agent-smith-httpd.win.exe" -Force).FullName
-        env:
+          ls ./build/windows/installer/tmp
+          env:
           GH_TOKEN: ${{ secrets.gh_pat }}
 
       - name: Setup go
