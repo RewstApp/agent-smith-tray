@@ -16,6 +16,11 @@ let tray;
 const offlineIcon = nativeImage.createFromPath(__dirname + "/icon/offline.png");
 const onlineIcon = nativeImage.createFromPath(__dirname + "/icon/online.png");
 
+const reconnect = (delay = 2000) => {
+  console.log(`Reconnecting in ${delay / 1000}s...`);
+  setTimeout(runClient, 2000);
+};
+
 const runClient = () => {
   const socket = new WebSocket("ws://localhost:50001/ws");
 
@@ -52,11 +57,15 @@ const runClient = () => {
   // Handle errors
   socket.addEventListener("error", (err) => {
     console.error("WebSocket error:", err);
+
+    reconnect();
   });
 
   // Handle close
   socket.addEventListener("close", () => {
     console.log("WebSocket connection closed");
+
+    reconnect();
   });
 };
 
