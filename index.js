@@ -26,9 +26,9 @@ let tray;
 const offlineIcon = nativeImage.createFromPath(__dirname + "/icon/offline.png");
 const onlineIcon = nativeImage.createFromPath(__dirname + "/icon/online.png");
 
-const reconnect = (delay = 2000) => {
-  console.log(`Reconnecting in ${delay / 1000}s...`);
-  setTimeout(runClient, 2000);
+const reconnect = (delayMs = 2000) => {
+  console.log(`Reconnecting in ${delayMs / 1000}s...`);
+  setTimeout(runClient, delayMs);
 };
 
 const runClient = () => {
