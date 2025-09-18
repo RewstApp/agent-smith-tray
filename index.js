@@ -34,72 +34,20 @@ const reconnect = (delay = 2000) => {
 const runClient = () => {
   const socket = new WebSocket("ws://localhost:50001/ws");
 
-  // Connection opened
   socket.addEventListener("open", () => {
-    console.log("Connected to WebSocket server");
+    app.emit("socket:open");
   });
 
-  // Listen for messages
   socket.addEventListener("message", (event) => {
-    console.log("Message from server:", event.data);
-
-    const separatorIndex = event.data.indexOf(":");
-    const [type, value] =
-      separatorIndex === -1
-        ? [event.data, ""]
-        : [
-            event.data.substr(0, separatorIndex),
-            event.data.substr(separatorIndex + 1),
-          ];
-
-    if (type === "AgentStatus") {
-      if (value === "Online") {
-        tray.setToolTip("Online");
-        tray.setImage(onlineIcon);
-      } else if (value === "Offline" || value === "Reconnecting") {
-        tray.setToolTip("Offline");
-        tray.setImage(offlineIcon);
-      } else if (value === "Reconnecting") {
-        tray.setToolTip("Reconnecting...");
-        tray.setImage(offlineIcon);
-      }
-      return;
-    }
-
-    if (type === "AgentReceivedMessage") {
-      try {
-        const payload = JSON.parse(value);
-        const { type: messageType = "", content = "" } = payload;
-        console.log(
-          "Received message",
-          "type",
-          messageType,
-          "content",
-          content
-        );
-
-        if (messageType === "user_interaction_html") {
-          createInteractionWindow(content);
-        }
-      } catch (err) {
-        console.error("Failed to parse data", err);
-      }
-      return;
-    }
+    app.emit("socket:message", event.data);
   });
 
-  // Handle errors
   socket.addEventListener("error", (err) => {
-    console.error("WebSocket error:", err);
-
-    reconnect();
+    app.emit("socket:error", err);
   });
 
-  // Handle close
   socket.addEventListener("close", () => {
-    console.log("WebSocket connection closed");
-
-    reconnect();
+    app.emit("socket:close");
   });
 };
 
@@ -126,4 +74,62 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", () => {
   // having this listener active will prevent the app from quitting.
+});
+
+app.on("socket:open", () => {
+  console.log("Connected to WebSocket server");
+});
+
+app.on("socket:message", (data) => {
+  console.log("Message from server:", data);
+
+  const separatorIndex = data.indexOf(":");
+  const [type, value] =
+    separatorIndex === -1
+      ? [data, ""]
+      : [data.substr(0, separatorIndex), data.substr(separatorIndex + 1)];
+
+  if (type === "AgentStatus") {
+    app.emit("agent:status", value);
+    return;
+  }
+
+  if (type === "AgentReceivedMessage") {
+    try {
+      const payload = JSON.parse(value);
+      const { type: messageType = "", content = "" } = payload;
+      console.log("Received message", "type", messageType, "content", content);
+
+      if (messageType === "user_interaction_html") {
+        createInteractionWindow(content);
+      }
+    } catch (err) {
+      console.error("Failed to parse data", err);
+    }
+    return;
+  }
+});
+
+app.on("socket:error", (err) => {
+  console.error("WebSocket error:", err);
+  reconnect();
+});
+
+app.on("socket:close", () => {
+  console.log("WebSocket connection closed");
+  reconnect();
+});
+
+app.on("agent:status", (status) => {
+  console.log("Received agent:status", status);
+  if (status === "Online") {
+    tray.setToolTip("Online");
+    tray.setImage(onlineIcon);
+  } else if (status === "Offline" || status === "Stopped") {
+    tray.setToolTip("Offline");
+    tray.setImage(offlineIcon);
+  } else if (status === "Reconnecting") {
+    tray.setToolTip("Reconnecting...");
+    tray.setImage(offlineIcon);
+  }
 });
