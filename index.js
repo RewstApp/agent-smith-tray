@@ -10,6 +10,16 @@ const createWindow = () => {
   win.loadFile("index.html");
 };
 
+const createInteractionWindow = (html) => {
+  const win = new BrowserWindow({
+    width: 400,
+    height: 300,
+    autoHideMenuBar: true,
+  });
+
+  win.loadURL(`data:text/html,${html}`);
+};
+
 // save a reference to the Tray object globally to avoid garbage collection
 let tray;
 
@@ -46,9 +56,33 @@ const runClient = () => {
       if (value === "Online") {
         tray.setToolTip("Online");
         tray.setImage(onlineIcon);
-      } else {
+      } else if (value === "Offline" || value === "Reconnecting") {
         tray.setToolTip("Offline");
         tray.setImage(offlineIcon);
+      } else if (value === "Reconnecting") {
+        tray.setToolTip("Reconnecting...");
+        tray.setImage(offlineIcon);
+      }
+      return;
+    }
+
+    if (type === "AgentReceivedMessage") {
+      try {
+        const payload = JSON.parse(value);
+        const { type: messageType = "", content = "" } = payload;
+        console.log(
+          "Received message",
+          "type",
+          messageType,
+          "content",
+          content
+        );
+
+        if (messageType === "user_interaction_html") {
+          createInteractionWindow(content);
+        }
+      } catch (err) {
+        console.error("Failed to parse data", err);
       }
       return;
     }
