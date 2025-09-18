@@ -12,6 +12,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -22,8 +23,8 @@ const createWindow = () => {
 
 const createInteractionWindow = (html) => {
   const win = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 600,
+    height: 450,
     autoHideMenuBar: true,
   });
 
