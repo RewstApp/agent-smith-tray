@@ -98,15 +98,15 @@ app.on("socket:message", (data) => {
     try {
       const payload = JSON.parse(value);
       const { type: messageType = "", content = "" } = payload;
+
       console.log("Received message", "type", messageType, "content", content);
 
-      if (messageType === "user_interaction_html") {
-        createInteractionWindow(content);
-      }
+      app.emit("agent:message", messageType, content);
     } catch (err) {
       console.error("Failed to parse data", err);
+    } finally {
+      return;
     }
-    return;
   }
 });
 
@@ -131,5 +131,12 @@ app.on("agent:status", (status) => {
   } else if (status === "Reconnecting") {
     tray.setToolTip("Reconnecting...");
     tray.setImage(offlineIcon);
+  }
+});
+
+app.on("agent:message", (type, content) => {
+  if (type === "user_interaction_html") {
+    createInteractionWindow(content);
+    return;
   }
 });
