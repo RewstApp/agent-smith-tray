@@ -1,13 +1,23 @@
 const { app, BrowserWindow, Tray, Menu } = require("electron");
 const { nativeImage } = require("electron/common");
+const path = require("node:path");
+
+let tray;
+let mainWindow;
+
+const offlineIcon = nativeImage.createFromPath(__dirname + "/icon/offline.png");
+const onlineIcon = nativeImage.createFromPath(__dirname + "/icon/online.png");
 
 const createWindow = () => {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+    },
   });
 
-  win.loadFile("index.html");
+  mainWindow.loadFile("index.html");
 };
 
 const createInteractionWindow = (html) => {
@@ -19,12 +29,6 @@ const createInteractionWindow = (html) => {
 
   win.loadURL(`data:text/html,${html}`);
 };
-
-// save a reference to the Tray object globally to avoid garbage collection
-let tray;
-
-const offlineIcon = nativeImage.createFromPath(__dirname + "/icon/offline.png");
-const onlineIcon = nativeImage.createFromPath(__dirname + "/icon/online.png");
 
 const reconnect = (delayMs = 2000) => {
   console.log(`Reconnecting in ${delayMs / 1000}s...`);
@@ -137,6 +141,11 @@ app.on("agent:status", (status) => {
 app.on("agent:message", (type, content) => {
   if (type === "user_interaction_html") {
     createInteractionWindow(content);
+    return;
+  }
+
+  if (type === "links") {
+    mainWindow.webContents.send("agent:links", content);
     return;
   }
 });
