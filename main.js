@@ -75,7 +75,10 @@ const setupTray = () => {
         mainWindow.show();
       },
     },
-    { role: "quit" },
+    {
+      label: "Quit",
+      role: "quit",
+    },
   ]);
   tray.setContextMenu(contextMenu);
   tray.setTitle("Agent Smith");
