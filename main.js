@@ -13,9 +13,19 @@ const createWindow = () => {
     width: 800,
     height: 600,
     autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+  });
+
+  mainWindow.on("close", (event) => {
+    if (app.isQuitting) {
+      return;
+    }
+
+    event.preventDefault();
+    mainWindow.hide();
   });
 
   mainWindow.loadFile("index.html");
@@ -62,7 +72,7 @@ const setupTray = () => {
     {
       label: "Show",
       click: () => {
-        createWindow();
+        mainWindow.show();
       },
     },
     { role: "quit" },
@@ -73,8 +83,13 @@ const setupTray = () => {
 };
 
 app.whenReady().then(() => {
+  createWindow();
   setupTray();
   runClient();
+});
+
+app.on("before-quit", () => {
+  app.isQuitting = true; // set flag before quitting
 });
 
 app.on("window-all-closed", () => {
