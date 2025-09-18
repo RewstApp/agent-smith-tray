@@ -6,13 +6,18 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <title>Hello from Electron renderer!</title>
+    <link rel="stylesheet" href="./assets/bootstrap.min.css" />
+    <script src="./assets/bootstrap.bundle.min.js"></script>
+
+    <title>Agent Smith Tray</title>
 </head>
 
 <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p>👋</p>
-    <div id="links">THIS IS WHERE LINKS WILL SHOW UP</div>
+    <div class="container">
+        <div id="links">
+            <h5 class="text-center p-4">No links</h5>
+        </div>
+    </div>
 
     <script src="./renderer.js"></script>
 </body>
