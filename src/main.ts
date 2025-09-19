@@ -1,50 +1,14 @@
-import { app, BrowserWindow, Tray, Menu } from "electron";
-import { nativeImage } from "electron/common";
+import { app, BrowserWindow, Tray } from "electron";
 import { EventEmitter } from "events";
-import path from "path";
+import { createTray, setOffline, setOnline, setReconnecting } from "./tray";
+import { createInteractionWindow } from "./interaction-window";
+import { createMainWindow } from "./main-window";
 
 let tray: Tray | undefined;
 let mainWindow: BrowserWindow | undefined;
 let isQuitting = false;
 
 const customEvents = new EventEmitter();
-
-const offlineIcon = nativeImage.createFromPath(path.join(__dirname, "../icon/offline.png"));
-const onlineIcon = nativeImage.createFromPath(path.join(__dirname, "../icon/online.png"));
-
-const createWindow = () => {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        autoHideMenuBar: true,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "../dist/preload.js"),
-        },
-    });
-
-    mainWindow.on("close", (event) => {
-        if (isQuitting) {
-            return;
-        }
-
-        event.preventDefault();
-        mainWindow?.hide();
-    });
-
-    mainWindow.loadFile("index.html");
-};
-
-const createInteractionWindow = (html: string) => {
-    const win = new BrowserWindow({
-        width: 600,
-        height: 450,
-        autoHideMenuBar: true,
-        alwaysOnTop: true,
-    });
-
-    win.loadURL(`data:text/html,${html}`);
-};
 
 const reconnect = (delayMs = 2000) => {
     console.log(`Reconnecting in ${delayMs / 1000}s...`);
@@ -71,28 +35,18 @@ const runClient = () => {
     });
 };
 
-const setupTray = () => {
-    tray = new Tray(offlineIcon);
-    const contextMenu = Menu.buildFromTemplate([
-        {
-            label: "Show",
-            click: () => {
-                mainWindow?.show();
-            },
-        },
-        {
-            label: "Quit",
-            role: "quit",
-        },
-    ]);
-    tray.setContextMenu(contextMenu);
-    tray.setTitle("Agent Smith");
-    tray.setToolTip("Offline");
-};
-
 app.whenReady().then(() => {
-    createWindow();
-    setupTray();
+    mainWindow = createMainWindow({
+        onClose: (event) => {
+            if (isQuitting) {
+                return;
+            }
+
+            event.preventDefault();
+            mainWindow?.hide();
+        }
+    });
+    tray = createTray({ mainWindow });
     runClient();
 });
 
@@ -140,25 +94,24 @@ customEvents.on("socket:message", (data) => {
 
 customEvents.on("socket:error", (err) => {
     console.error("WebSocket error:", err);
+    setOffline({ tray });
     reconnect();
 });
 
 customEvents.on("socket:close", () => {
     console.log("WebSocket connection closed");
+    setOffline({ tray });
     reconnect();
 });
 
 customEvents.on("agent:status", (status) => {
     console.log("Received agent:status", status);
     if (status === "Online") {
-        tray?.setToolTip("Online");
-        tray?.setImage(onlineIcon);
+        setOnline({ tray });
     } else if (status === "Offline" || status === "Stopped") {
-        tray?.setToolTip("Offline");
-        tray?.setImage(offlineIcon);
+        setOffline({ tray });
     } else if (status === "Reconnecting") {
-        tray?.setToolTip("Reconnecting...");
-        tray?.setImage(offlineIcon);
+        setReconnecting({ tray });
     }
 });
 
