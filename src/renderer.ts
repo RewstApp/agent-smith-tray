@@ -1,14 +1,15 @@
 const links = document.getElementById("links");
 
-window.electronAPI.onUpdateLinks((linksValue) => {
+window.electronAPI.onUpdateLinks((linksValue: string) => {
   const linksData = JSON.parse(linksValue);
-
   const linkElements = linksData
     .map(
-      (data) =>
+      (data: any) =>
         `<button type="button" class="btn btn-primary btn-lg">${data.name}</button>`
     )
     .join("");
 
-  links.innerHTML = linkElements;
+  if (links) {
+    links.innerHTML = linkElements;
+  }
 });

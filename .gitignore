@@ -4,6 +4,7 @@ node_modules
 
 /frontend/dist
 /frontend/wailsjs/**
+/dist
 
 *.asar
 *.md5
