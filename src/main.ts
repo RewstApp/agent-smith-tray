@@ -70,13 +70,13 @@ events.on("socket:message", (data) => {
 events.on("socket:error", (err) => {
     console.error("WebSocket error:", err);
     setOffline({ tray });
-    reconnect();
+    reconnect({ events });
 });
 
 events.on("socket:close", () => {
     console.log("WebSocket connection closed");
     setOffline({ tray });
-    reconnect();
+    reconnect({ events });
 });
 
 events.on("agent:status", (status) => {

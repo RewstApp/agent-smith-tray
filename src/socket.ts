@@ -7,6 +7,10 @@ type ConnectProps = {
     path?: string;
 }
 
+type ReconnectProps = ConnectProps & {
+    delayMs?: number;
+}
+
 export const connect = (props: ConnectProps) => {
     const { events, port = 50001, path = "ws" } = props;
     const socket = new WebSocket(`ws://localhost:${port}/${path}`);
@@ -26,11 +30,10 @@ export const connect = (props: ConnectProps) => {
     socket.addEventListener("close", () => {
         events.emit("socket:close");
     });
-
-    return socket;
 };
 
-export const reconnect = (delayMs = 2000) => {
+export const reconnect = (props: ReconnectProps) => {
+    const { delayMs = 2000 } = props;
     console.log(`Reconnecting in ${delayMs / 1000}s...`);
-    setTimeout(connect, delayMs);
+    setTimeout(() => connect(props), delayMs);
 };
