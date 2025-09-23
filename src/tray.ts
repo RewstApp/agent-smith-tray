@@ -1,9 +1,13 @@
-import { Tray, Menu, BrowserWindow } from "electron";
-import { nativeImage } from "electron";
+import { Tray, Menu, BrowserWindow, nativeImage } from "electron";
 import path from "path";
+import offlineIconName from "./assets/offline.ico";
+import onlineIconName from "./assets/online.ico";
 
-export const offlineIcon = nativeImage.createFromPath(path.join(__dirname, "../icon/offline.ico"));
-export const onlineIcon = nativeImage.createFromPath(path.join(__dirname, "../icon/online.ico"));
+const offlineIconPath = path.join(__dirname, offlineIconName);
+const onlineIconPath = path.join(__dirname, onlineIconName);
+
+export const offlineIcon = nativeImage.createFromPath(offlineIconPath);
+export const onlineIcon = nativeImage.createFromPath(onlineIconPath);
 
 type CreateTrayProps = {
     mainWindow?: BrowserWindow;
