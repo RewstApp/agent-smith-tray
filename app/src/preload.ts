@@ -1,2 +1,9 @@
-// See the Electron documentation for details on how to use preload scripts:
-// https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
+import { contextBridge, ipcRenderer } from "electron";
+
+contextBridge.exposeInMainWorld("electronAPI", {
+    onUpdateLinks: (callback: (value: string) => void) =>
+        ipcRenderer.on("agent:links", (_event, value) => callback(value)),
+    clearUpdateLinks: () => {
+        ipcRenderer.removeAllListeners("agent:links");
+    }
+});
