@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow, session, Tray } from 'electron';
 import { createTray, onlineIcon, setOffline, setOnline, setReconnecting } from './tray';
 import { createEmitter } from './events';
 import { connect, reconnect } from './socket';
@@ -47,6 +47,24 @@ const createWindow = (): void => {
 };
 
 app.on('ready', () => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    if (details.webContentsId === mainWindow?.webContents?.id) {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self' https: data:; " +
+            "script-src 'self' 'unsafe-eval'; " +
+            "style-src 'self' https: 'unsafe-inline'; "
+          ]
+        }
+      });
+      return;
+    }
+
+    callback(details.responseHeaders);
+  });
+
   createWindow();
   tray = createTray({ mainWindow });
   connect({ events });
