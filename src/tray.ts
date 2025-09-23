@@ -20,21 +20,25 @@ type SetTrayProps = {
 export const createTray = (props: CreateTrayProps | undefined) => {
     const { mainWindow } = props ?? {};
     const tray = new Tray(offlineIcon);
+    const handleShow = () => {
+        mainWindow?.show();
+    };
+
     const contextMenu = Menu.buildFromTemplate([
         {
             label: "Show",
-            click: () => {
-                mainWindow?.show();
-            },
+            click: handleShow,
         },
         {
             label: "Quit",
             role: "quit",
         },
     ]);
+
     tray.setContextMenu(contextMenu);
     tray.setTitle("Agent Smith");
     tray.setToolTip("Offline");
+    tray.on("double-click", handleShow);
 
     return tray;
 };

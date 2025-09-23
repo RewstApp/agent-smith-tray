@@ -1,25 +1,13 @@
 import { useEffect, useState } from "react";
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider } from "@mui/material";
-
-type Link = {
-  name: string;
-  url: string;
-};
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#2BB5B6",
-      dark: "#009490",
-    },
-  },
-});
+import { Link } from "../models";
+import LinkButton from "./link-button";
+import LinkView from "./link-view";
 
 export default function MainWindow() {
   const [links, setLinks] = useState<Link[]>([]);
+  const [currentLink, setCurrentLink] = useState<Link | null>(null);
 
   useEffect(() => {
     window.electronAPI.onUpdateLinks((linksJson) => {
@@ -30,11 +18,15 @@ export default function MainWindow() {
   }, []);
 
   const handleLinkClick = (selectedLink: Link) => {
-    // TODO: setCurrentLink(selectedLink);
+    setCurrentLink(selectedLink);
   };
 
-  return (
-    <ThemeProvider theme={theme}>
+  const handleBack = () => {
+    setCurrentLink(null);
+  };
+
+  if (!currentLink) {
+    return (
       <Stack
         direction="row"
         spacing={2}
@@ -43,27 +35,16 @@ export default function MainWindow() {
         sx={{ height: "100vh" }}
       >
         {links.map((link, index) => (
-          <Button
+          <LinkButton
             key={`link-${index}`}
-            variant="contained"
-            onClick={() => handleLinkClick(link)}
-            sx={{
-              borderRadius: "50px",
-              px: 4,
-              py: 1.5,
-              fontWeight: "bold",
-              textTransform: "none",
-              boxShadow: 3,
-              "&:hover": {
-                boxShadow: 6,
-              },
-            }}
-          >
-            <Typography variant="h6">{link.name}</Typography>
-          </Button>
+            link={link}
+            onClick={handleLinkClick}
+          />
         ))}
         {links.length === 0 && <Typography variant="h6">No links</Typography>}
       </Stack>
-    </ThemeProvider>
-  );
+    );
+  }
+
+  return <LinkView link={currentLink} onBack={handleBack} />;
 }
