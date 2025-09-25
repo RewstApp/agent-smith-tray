@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import { onlineIcon } from "./tray";
+import { onlineIcon } from "./main/tray";
 
 export const createInteractionWindow = (html: string) => {
     const win = new BrowserWindow({
