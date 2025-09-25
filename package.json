@@ -25,7 +25,6 @@
     "productName": "AgentSmithTray",
     "files": [
       "dist/**/*",
-      "main.js",
       "package.json"
     ],
     "directories": {
@@ -49,37 +48,24 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-react": "^7.27.1",
-    "@electron/fuses": "^1.8.0",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
-    "babel-loader": "^10.0.0",
     "css-loader": "^6.11.0",
     "electron": "38.1.2",
     "electron-builder": "^26.0.12",
-    "eslint": "^8.57.1",
-    "eslint-plugin-import": "^2.32.0",
-    "fork-ts-checker-webpack-plugin": "^7.3.0",
     "html-webpack-plugin": "^5.6.4",
-    "node-loader": "^2.1.0",
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.2",
-    "webpack-cli": "^6.0.1",
-    "webpack-node-externals": "^3.0.0"
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   }
