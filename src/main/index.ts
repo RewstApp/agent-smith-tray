@@ -1,9 +1,11 @@
-import { app, BrowserWindow, session, Tray } from 'electron';
+import { app, BrowserWindow, ipcMain, session, Tray } from 'electron';
 import { createTray, onlineIcon, setOffline, setOnline, setReconnecting } from './tray';
 import { createEmitter } from './events';
 import { connect, reconnect } from './socket';
 import { createInteractionWindow } from '../interaction-window';
 import * as path from "path";
+import { getConfigFilePath, loadLinks, storeLinks } from './config';
+import { Link } from '../models';
 
 const events = createEmitter();
 
@@ -11,7 +13,7 @@ let tray: Tray | undefined;
 let mainWindow: BrowserWindow | undefined;
 let isQuitting = false;
 
-const createWindow = (): void => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
@@ -141,7 +143,7 @@ events.on("agent:status", (status) => {
   }
 });
 
-events.on("agent:message", (type, content) => {
+events.on("agent:message", async (type, content) => {
   if (type === "user_interaction_html") {
     createInteractionWindow(content);
     return;
@@ -149,6 +151,16 @@ events.on("agent:message", (type, content) => {
 
   if (type === "links") {
     mainWindow?.webContents?.send("agent:links", content);
+    await storeLinks(JSON.parse(content) as Link[]);
+
+    console.log("Links stored in " + getConfigFilePath());
     return;
   }
+});
+
+ipcMain.handle("load:links", async () => {
+  const links = await loadLinks();
+  console.log("Links loaded from " + getConfigFilePath());
+
+  return links;
 });

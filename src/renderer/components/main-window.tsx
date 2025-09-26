@@ -14,6 +14,8 @@ export default function MainWindow() {
       setLinks(JSON.parse(linksJson));
     });
 
+    window.electronAPI.loadLinks().then((links) => setLinks(links));
+
     return () => window.electronAPI.clearUpdateLinks();
   }, []);
 

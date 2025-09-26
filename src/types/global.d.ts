@@ -1,3 +1,5 @@
+import { Link } from "../models";
+
 export { };
 
 declare global {
@@ -5,6 +7,7 @@ declare global {
         electronAPI: {
             onUpdateLinks: (callback: (links: string) => void) => void;
             clearUpdateLinks: () => void;
+            loadLinks: () => Promise<Link[]>;
         };
     }
 }
