@@ -35,8 +35,6 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(path.join(__dirname, "index.html"));
-
-  mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', () => {
