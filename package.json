@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "io.rewst.agent-smith-tray",
-    "productName": "AgentSmithTray",
+    "productName": "Agent Smith Tray",
     "files": [
       "dist/**/*",
       "package.json"
@@ -35,17 +35,13 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
+      "perMachine": true,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/assets/online.ico",
-      "uninstallerIcon": "src/assets/online.ico"
+      "createDesktopShortcut": false
     }
   },
   "keywords": [],
-  "author": {
-    "name": "mlataza",
-    "email": "1750947+mlataza@users.noreply.github.com"
-  },
+  "author": "Rewst Inc.",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.5.2",
