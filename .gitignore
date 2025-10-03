@@ -1,11 +1,5 @@
-build/bin
-tmp
-node_modules
+dist/
+node_modules/
+release/
 
-/frontend/dist
-/frontend/wailsjs/**
-
-*.asar
-*.md5
-*.nsh
 *.exe

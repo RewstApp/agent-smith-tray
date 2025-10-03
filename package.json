@@ -1,8 +1,70 @@
 {
+  "name": "agent-smith-tray",
+  "productName": "Agent Smith Tray",
+  "version": "0.1.0",
+  "description": "Agent Smith Tray",
+  "homepage": "https://github.com/RewstApp/agent-smith-tray#readme",
+  "bugs": {
+    "url": "https://github.com/RewstApp/agent-smith-tray/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RewstApp/agent-smith-tray.git"
+  },
+  "main": "dist/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "build:main": "webpack --config webpack.main.config.js",
+    "build:renderer": "webpack --config webpack.renderer.config.js",
+    "build": "npm run build:main && npm run build:renderer",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "io.rewst.agent-smith-tray",
+    "productName": "Agent Smith Tray",
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "publish": null,
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": false,
+      "artifactName": "${name}-installer.${ext}"
+    }
+  },
+  "keywords": [],
+  "author": "Rewst Inc.",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "css-loader": "^6.11.0",
+    "electron": "38.1.2",
+    "electron-builder": "^26.0.12",
+    "html-webpack-plugin": "^5.6.4",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
-    "@mui/material": "^7.3.2"
+    "@mui/material": "^7.3.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }
