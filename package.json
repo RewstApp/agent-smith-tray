@@ -37,7 +37,8 @@
       "oneClick": false,
       "perMachine": true,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": false
+      "createDesktopShortcut": false,
+      "artifactName": "${name}-installer.${ext}"
     }
   },
   "keywords": [],
