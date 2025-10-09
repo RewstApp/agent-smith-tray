@@ -115,7 +115,3 @@ After staging your changes, commit using:
 ```cmd
 cz commit
 ```
-
----
-
-Would you like me to add a “Troubleshooting” section (for common installer or runtime issues) or keep it as-is?
