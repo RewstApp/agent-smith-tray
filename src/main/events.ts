@@ -3,7 +3,8 @@ import { EventEmitter } from "events";
 export type EventMap = {
     "socket:open": [];
     "socket:message": [data: string];
-    "socket:error": [err: Event];
+    "socket:error": [err: Error];
+    "socket:unauthorized": [];
     "socket:close": [];
     "agent:status": [status: string];
     "agent:message": [type: string, content: string];

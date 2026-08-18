@@ -5,6 +5,7 @@ import { connect, reconnect } from './socket';
 import { createInteractionWindow } from '../interaction-window';
 import * as path from "path";
 import { getConfigFilePath, loadLinks, storeLinks } from './config';
+import { findOrgConfig } from './orgConfig';
 import { Link } from '../models';
 
 const events = createEmitter();
@@ -12,6 +13,19 @@ const events = createEmitter();
 let tray: Tray | undefined;
 let mainWindow: BrowserWindow | undefined;
 let isQuitting = false;
+
+const startConnection = async () => {
+  const orgConfig = await findOrgConfig();
+
+  if (!orgConfig) {
+    console.error("Unable to locate Agent Smith httpd credentials; will retry.");
+    setOffline({ tray });
+    reconnect({}, startConnection);
+    return;
+  }
+
+  connect({ events, port: orgConfig.httpdPort, token: orgConfig.httpdToken });
+};
 
 const createWindow = async () => {
   mainWindow = new BrowserWindow({
@@ -60,7 +74,7 @@ app.on('ready', () => {
 
   createWindow();
   tray = createTray({ mainWindow });
-  connect({ events });
+  startConnection();
 });
 
 app.on("before-quit", () => {
@@ -121,13 +135,19 @@ events.on("socket:message", (data) => {
 events.on("socket:error", (err) => {
   console.error("WebSocket error:", err);
   setOffline({ tray });
-  reconnect({ events });
+  reconnect({}, startConnection);
+});
+
+events.on("socket:unauthorized", () => {
+  console.error("WebSocket handshake rejected: 401 Unauthorized. Check that httpd_token in the RewstRemoteAgent org config matches.");
+  setOffline({ tray });
+  reconnect({}, startConnection);
 });
 
 events.on("socket:close", () => {
   console.log("WebSocket connection closed");
   setOffline({ tray });
-  reconnect({ events });
+  reconnect({}, startConnection);
 });
 
 events.on("agent:status", (status) => {
